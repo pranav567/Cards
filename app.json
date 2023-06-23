@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Cards",
+    "slug": "Cards",
+    "version": "1.0.0",
+    "icon": "./assets/icon-jack.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-2.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon-jack.png",
+        "backgroundColor": "#000000"
+      },
+      "package": "com.pranavpn7.Cards"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "c3824e51-2a1f-47c6-b2f0-9f94334fb046"
+      }
+    }
+  }
+}
