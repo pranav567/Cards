@@ -69,761 +69,873 @@ const Game = ({ navigation, route }) => {
         let tmp2 = user2Data;
 
         let arr = [];
+        let scores = [a, b, c];
+        let mx = 0;
+        let finalArrayName = [];
+        scores.forEach((obj, index) => {
+          if (obj < 22 && obj > mx) mx = obj;
+        });
+
+        // console.log(mx);
+
+        if (a == mx) {
+          finalArrayName.push("dealer");
+        }
+        if (b == mx) {
+          finalArrayName.push("user1");
+        }
+        if (c == mx) {
+          finalArrayName.push("user2");
+        }
+        // console.log(finalArrayName);
+
+        if (mx == 21 && finalArrayName.length > 1) {
+          let winners = 0;
+          if (a == 21 && dealerCardCount == 2) winners += 1;
+          if (b == 21 && user1Data.getCards().length == 2) winners += 1;
+          if (c == 21 && user2Data.getCards().length == 2) winners += 1;
+
+          if (a == 21 && dealerCardCount == 2) {
+            arr.push({
+              name: "Dealer",
+              winning: Math.floor(potAmount / winners),
+              score: dealerScore,
+              cards: dealerCards,
+            });
+          }
+          if (b == 21 && user1Data.getCards().length == 2) {
+            arr.push({
+              balance:
+                user1Data.getCoinBalance() + Math.floor(potAmount / winners),
+              name: user1Data.getName(),
+              winning: Math.floor(potAmount / winners),
+              score: user1Data.getScore(),
+              cards: user1Data.getCards(),
+            });
+            tmp1.addCoins(Math.floor(potAmount / winners));
+          }
+          if (c == 21 && user2Data.getCards().length == 2) {
+            arr.push({
+              balance:
+                user2Data.getCoinBalance() + Math.floor(potAmount / winners),
+              name: user2Data.getName(),
+              winning: Math.floor(potAmount / winners),
+              score: user2Data.getScore(),
+              cards: user2Data.getCards(),
+            });
+            tmp2.addCoins(Math.floor(potAmount / winners));
+          }
+        } else {
+          if (finalArrayName.length > 0) {
+            if (finalArrayName.includes("dealer")) {
+              // console.log("hell");
+              arr.push({
+                name: "Dealer",
+                winning: Math.floor(potAmount / finalArrayName.length),
+                score: dealerScore,
+                cards: dealerCards,
+              });
+            }
+            if (finalArrayName.includes("user1")) {
+              // console.log("hell");
+              arr.push({
+                balance:
+                  user1Data.getCoinBalance() +
+                  Math.floor(potAmount / finalArrayName.length),
+                name: user1Data.getName(),
+                winning: Math.floor(potAmount / finalArrayName.length),
+                score: user1Data.getScore(),
+                cards: user1Data.getCards(),
+              });
+              tmp1.addCoins(Math.floor(potAmount / finalArrayName.length));
+            }
+            if (finalArrayName.includes("user2")) {
+              // console.log("hell");
+              arr.push({
+                balance:
+                  user2Data.getCoinBalance() +
+                  Math.floor(potAmount / finalArrayName.length),
+                name: user2Data.getName(),
+                winning: Math.floor(potAmount / finalArrayName.length),
+                score: user2Data.getScore(),
+                cards: user2Data.getCards(),
+              });
+              tmp2.addCoins(Math.floor(potAmount / finalArrayName.length));
+            }
+          } else {
+            arr.push({
+              balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+              name: user1Data.getName(),
+              winning: Math.floor(potAmount / 2),
+              score: user1Data.getScore(),
+              cards: user1Data.getCards(),
+            });
+            tmp1.addCoins(Math.floor(potAmount / 2));
+            arr.push({
+              balance: user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+              name: user2Data.getName(),
+              winning: Math.floor(potAmount / 2),
+              score: user2Data.getScore(),
+              cards: user2Data.getCards(),
+            });
+            tmp2.addCoins(Math.floor(potAmount / 2));
+          }
+        }
 
         // console.log(a, b, c);
 
-        if (a < 22 && b < 22 && c < 22) {
-          if (a > b && a > c) {
-            //dealer wins
-            arr.push({
-              name: "Dealer",
-              winning: potAmount,
-              score: dealerScore,
-              cards: dealerCards,
-            });
-          } else if (b > a && b > c) {
-            //user1 wins
-            arr.push({
-              balance: user1Data.getCoinBalance() + potAmount,
-              name: user1Data.getName(),
-              winning: potAmount,
-              score: user1Data.getScore(),
-              cards: user1Data.getCards(),
-            });
-            tmp1.addCoins(potAmount);
-          } else if (c > a && c > b) {
-            //user2 wins
-            arr.push({
-              balance: user2Data.getCoinBalance() + potAmount,
-              name: user2Data.getName(),
-              winning: potAmount,
-              score: user2Data.getScore(),
-              cards: user2Data.getCards(),
-            });
-            tmp2.addCoins(potAmount);
-          } else if (a == b && a > c) {
-            //check dealer and user 1 length of
-            if (a == 21) {
-              if (dealerCardCount == 2 && user1Data.getCards().length == 2) {
-                //tie
-                arr.push({
-                  name: "Dealer",
-                  winning: Math.floor(potAmount / 2),
-                  score: dealerScore,
-                });
-                arr.push({
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  name: user1Data.getName(),
-                  winning: Math.floor(potAmount / 2),
-                  score: user1Data.getScore(),
-                });
-                tmp1.addCoins(Math.floor(potAmount / 2));
-              } else if (
-                dealerCardCount == 2 &&
-                user1Data.getCards().length > 2
-              ) {
-                //dealer wins
-                arr.push({
-                  name: "Dealer",
-                  winning: potAmount,
-                  score: dealerScore,
-                  cards: dealerCards,
-                });
-              } else if (
-                dealerCardCount > 2 &&
-                user1Data.getCards().length == 2
-              ) {
-                //user1 wins
-                arr.push({
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  name: user1Data.getName(),
-                  winning: potAmount,
-                  score: user1Data.getScore(),
-                  cards: user1Data.getCards(),
-                });
-                tmp1.addCoins(potAmount);
-              } else {
-                //tie
-                arr.push({
-                  name: "Dealer",
-                  winning: Math.floor(potAmount / 2),
-                  score: dealerScore,
-                });
-                arr.push({
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  name: user1Data.getName(),
-                  winning: Math.floor(potAmount / 2),
-                  score: user1Data.getScore(),
-                });
-                tmp1.addCoins(Math.floor(potAmount / 2));
-              }
-            } else {
-              // tie dealer user1
-              arr.push({
-                name: "Dealer",
-                winning: Math.floor(potAmount / 2),
-                score: dealerScore,
-              });
-              arr.push({
-                balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                name: user1Data.getName(),
-                winning: Math.floor(potAmount / 2),
-                score: user1Data.getScore(),
-              });
-              tmp1.addCoins(Math.floor(potAmount / 2));
-            }
-          } else if (a == c && a > b) {
-            //check dealer and user 1 length of cards
-            if (a == 21) {
-              if (dealerCardCount == 2 && user2Data.getCards().length == 2) {
-                //tie
-                arr.push({
-                  name: "Dealer",
-                  winning: Math.floor(potAmount / 2),
-                  score: dealerScore,
-                });
-                arr.push({
-                  name: user2Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user2Data.getScore(),
-                });
-                tmp2.addCoins(Math.floor(potAmount / 2));
-              } else if (
-                dealerCardCount == 2 &&
-                user2Data.getCards().length > 2
-              ) {
-                //dealer wins
-                arr.push({
-                  name: "Dealer",
-                  winning: potAmount,
-                  score: dealerScore,
-                  cards: dealerCards,
-                });
-              } else if (
-                dealerCardCount > 2 &&
-                user2Data.getCards().length == 2
-              ) {
-                //user2 wins
-                arr.push({
-                  name: user2Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user2Data.getScore(),
-                  cards: user2Data.getCards(),
-                });
-                tmp2.addCoins(potAmount);
-              } else {
-                //tie
-                arr.push({
-                  name: "Dealer",
-                  winning: Math.floor(potAmount / 2),
-                  score: dealerScore,
-                });
-                arr.push({
-                  name: user2Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user2Data.getScore(),
-                });
-                tmp2.addCoins(Math.floor(potAmount / 2));
-              }
-            } else {
-              //tie
-              arr.push({
-                name: "Dealer",
-                winning: Math.floor(potAmount / 2),
-                score: dealerScore,
-              });
-              arr.push({
-                name: user2Data.getName(),
-                balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                winning: Math.floor(potAmount / 2),
-                score: user2Data.getScore(),
-              });
-              tmp2.addCoins(Math.floor(potAmount / 2));
-            }
-          } else if (b == c && b > a) {
-            //check dealer and user 1 length of cards
-            if (b == 21) {
-              if (
-                user1Data.getCards().length == 2 &&
-                user2Data.getCards().length == 2
-              ) {
-                //tie
-                arr.push({
-                  name: user1Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user1Data.getScore(),
-                });
-                arr.push({
-                  name: user2Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user2Data.getScore(),
-                });
-                tmp1.addCoins(Math.floor(potAmount / 2));
-                tmp2.addCoins(Math.floor(potAmount / 2));
-              } else if (
-                user1Data.getCards().length == 2 &&
-                user2Data.getCards().length > 2
-              ) {
-                //user1 wins
-                arr.push({
-                  name: user1Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user1Data.getScore(),
-                  cards: user1Data.getCards(),
-                });
-                tmp1.addCoins(potAmount);
-              } else if (
-                user1Data.getCards().length > 2 &&
-                user2Data.getCards().length == 2
-              ) {
-                //user2 wins
-                arr.push({
-                  name: user2Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user2Data.getScore(),
-                  cards: user2Data.getCards(),
-                });
-                tmp2.addCoins(potAmount);
-              } else {
-                //tie
-                arr.push({
-                  name: user1Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user1Data.getScore(),
-                });
-                arr.push({
-                  name: user2Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user2Data.getScore(),
-                });
-                tmp1.addCoins(Math.floor(potAmount / 2));
-                tmp2.addCoins(Math.floor(potAmount / 2));
-              }
-            } else {
-              //tie
-              arr.push({
-                name: user1Data.getName(),
-                balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                winning: Math.floor(potAmount / 2),
-                score: user1Data.getScore(),
-              });
-              arr.push({
-                name: user2Data.getName(),
-                balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                winning: Math.floor(potAmount / 2),
-                score: user2Data.getScore(),
-              });
-              tmp1.addCoins(Math.floor(potAmount / 2));
-              tmp2.addCoins(Math.floor(potAmount / 2));
-            }
-          } else if (a == b && a == c) {
-            if (a == 21) {
-              if (dealerCardCount == 2) {
-                if (
-                  user1Data.getCards().length == 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //tie all
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 3),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 3),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 3),
-                    score: user1Data.getScore(),
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 3),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 3),
-                    score: user2Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 3));
-                  tmp2.addCoins(Math.floor(potAmount / 3));
-                } else if (
-                  user1Data.getCards().length == 2 &&
-                  user2Data.getCards().length > 2
-                ) {
-                  //dealer user1 tie
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 2),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                } else if (
-                  user1Data.getCards().length > 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //dealer user2 tie
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 2),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                } else {
-                  // dealer wins
-                  arr.push({
-                    name: "Dealer",
-                    winning: potAmount,
-                    score: dealerScore,
-                    cards: dealerCards,
-                  });
-                }
-              } else {
-                if (
-                  user1Data.getCards().length == 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //tie users
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                } else if (
-                  user1Data.getCards().length == 2 &&
-                  user2Data.getCards().length > 2
-                ) {
-                  //user1 wins
-                  arr.push({
-                    balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                    name: user1Data.getName(),
-                    winning: potAmount,
-                    score: user1Data.getScore(),
-                    cards: user1Data.getCards(),
-                  });
-                  tmp1.addCoins(potAmount);
-                } else if (
-                  user1Data.getCards().length > 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //user2 wins
-                  arr.push({
-                    balance: user2Data.getCoinBalance() + Math.floor(potAmount),
-                    name: user2Data.getName(),
-                    winning: potAmount,
-                    score: user2Data.getScore(),
-                    cards: user2Data.getCards(),
-                  });
-                  tmp2.addCoins(potAmount);
-                } else {
-                  // tie
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                }
-              }
-            } else {
-              //tie
-              arr.push({
-                name: "Dealer",
-                winning: Math.floor(potAmount / 3),
-                score: dealerScore,
-              });
-              arr.push({
-                name: user1Data.getName(),
-                balance: user1Data.getCoinBalance() + Math.floor(potAmount / 3),
-                winning: Math.floor(potAmount / 3),
-                score: user1Data.getScore(),
-              });
-              arr.push({
-                name: user2Data.getName(),
-                balance: user1Data.getCoinBalance() + Math.floor(potAmount / 3),
-                winning: Math.floor(potAmount / 3),
-                score: user2Data.getScore(),
-              });
-              tmp1.addCoins(Math.floor(potAmount / 3));
-              tmp2.addCoins(Math.floor(potAmount / 3));
-            }
-          }
-        } else {
-          if (a < 22 && b < 22) {
-            if (a !== b) {
-              if (a > b) {
-                arr.push({
-                  name: "Dealer",
-                  winning: potAmount,
-                  score: dealerScore,
-                  cards: dealerCards,
-                });
-              } else {
-                arr.push({
-                  name: user1Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user1Data.getScore(),
-                  cards: user1Data.getCards(),
-                });
-                tmp1.addCoins(potAmount);
-              }
-            } else {
-              //check dealer and user 1 length of
-              if (a == 21) {
-                if (dealerCardCount == 2 && user1Data.getCards().length == 2) {
-                  //tie
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 2),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                } else if (
-                  dealerCardCount == 2 &&
-                  user1Data.getCards().length > 2
-                ) {
-                  //dealer wins
-                  arr.push({
-                    name: "Dealer",
-                    winning: potAmount,
-                    score: dealerScore,
-                    cards: dealerCards,
-                  });
-                } else if (
-                  dealerCardCount > 2 &&
-                  user1Data.getCards().length == 2
-                ) {
-                  //user1 wins
-                  arr.push({
-                    balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                    name: user1Data.getName(),
-                    winning: potAmount,
-                    score: user1Data.getScore(),
-                    cards: user1Data.getCards(),
-                  });
-                  tmp1.addCoins(potAmount);
-                } else {
-                  //tie
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 2),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                }
-              } else {
-                // tie dealer user1
-                arr.push({
-                  name: "Dealer",
-                  winning: Math.floor(potAmount / 2),
-                  score: dealerScore,
-                });
-                arr.push({
-                  name: user1Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user1Data.getScore(),
-                });
-                tmp1.addCoins(Math.floor(potAmount / 2));
-              }
-            }
-          } else if (a < 22 && c < 22) {
-            if (a !== c) {
-              if (a > c) {
-                arr.push({
-                  name: "Dealer",
-                  winning: potAmount,
-                  score: dealerScore,
-                  cards: dealerCards,
-                });
-              } else {
-                arr.push({
-                  name: user2Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user2Data.getScore(),
-                  cards: user2Data.getCards(),
-                });
-                tmp2.addCoins(potAmount);
-              }
-            } else {
-              //check dealer and user 1 length of cards
-              if (a == 21) {
-                if (dealerCardCount == 2 && user2Data.getCards().length == 2) {
-                  //tie
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 2),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                } else if (
-                  dealerCardCount == 2 &&
-                  user2Data.getCards().length > 2
-                ) {
-                  //dealer wins
-                  arr.push({
-                    name: "Dealer",
-                    winning: potAmount,
-                    score: dealerScore,
-                    cards: dealerCards,
-                  });
-                } else if (
-                  dealerCardCount > 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //user2 wins
-                  arr.push({
-                    balance: user2Data.getCoinBalance() + Math.floor(potAmount),
-                    name: user2Data.getName(),
-                    winning: potAmount,
-                    score: user2Data.getScore(),
-                    cards: user2Data.getCards(),
-                  });
-                  tmp2.addCoins(potAmount);
-                } else {
-                  //tie
-                  arr.push({
-                    name: "Dealer",
-                    winning: Math.floor(potAmount / 2),
-                    score: dealerScore,
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                }
-              } else {
-                //tie
-                arr.push({
-                  name: "Dealer",
-                  winning: Math.floor(potAmount / 2),
-                  score: dealerScore,
-                });
-                arr.push({
-                  name: user2Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user2Data.getScore(),
-                });
-                tmp2.addCoins(Math.floor(potAmount / 2));
-              }
-            }
-          } else if (b < 22 && c < 22) {
-            if (c !== b) {
-              if (c > b) {
-                arr.push({
-                  name: user2Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user2Data.getScore(),
-                  cards: user2Data.getCards(),
-                });
-                tmp2.addCoins(potAmount);
-              } else {
-                arr.push({
-                  name: user1Data.getName(),
-                  balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                  winning: potAmount,
-                  score: user1Data.getScore(),
-                  cards: user1Data.getCards(),
-                });
-                tmp1.addCoins(potAmount);
-              }
-            } else {
-              //check dealer and user 1 length of cards
-              if (b == 21) {
-                if (
-                  user1Data.getCards().length == 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //tie
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                } else if (
-                  user1Data.getCards().length == 2 &&
-                  user2Data.getCards().length > 2
-                ) {
-                  //user1 wins
-                  arr.push({
-                    balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-                    name: user1Data.getName(),
-                    winning: potAmount,
-                    score: user1Data.getScore(),
-                    cards: user1Data.getCards(),
-                  });
-                  tmp1.addCoins(potAmount);
-                } else if (
-                  user1Data.getCards().length > 2 &&
-                  user2Data.getCards().length == 2
-                ) {
-                  //user2 wins
-                  arr.push({
-                    balance: user2Data.getCoinBalance() + Math.floor(potAmount),
-                    name: user2Data.getName(),
-                    winning: potAmount,
-                    score: user2Data.getScore(),
-                    cards: user2Data.getCards(),
-                  });
-                  tmp2.addCoins(potAmount);
-                } else {
-                  //tie
-                  arr.push({
-                    balance:
-                      user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user1Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user1Data.getScore(),
-                  });
-                  arr.push({
-                    balance:
-                      user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-                    name: user2Data.getName(),
-                    winning: Math.floor(potAmount / 2),
-                    score: user2Data.getScore(),
-                  });
-                  tmp1.addCoins(Math.floor(potAmount / 2));
-                  tmp2.addCoins(Math.floor(potAmount / 2));
-                }
-              } else {
-                //tie
-                arr.push({
-                  name: user1Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user1Data.getScore(),
-                });
-                arr.push({
-                  name: user2Data.getName(),
-                  balance:
-                    user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-                  winning: Math.floor(potAmount / 2),
-                  score: user2Data.getScore(),
-                });
-                tmp1.addCoins(Math.floor(potAmount / 2));
-                tmp2.addCoins(Math.floor(potAmount / 2));
-              }
-            }
-          } else if (a < 22) {
-            arr.push({
-              name: "Dealer",
-              winning: potAmount,
-              score: dealerScore,
-              cards: dealerCards,
-            });
-          } else if (b < 22) {
-            arr.push({
-              name: user1Data.getName(),
-              balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-              winning: potAmount,
-              score: user1Data.getScore(),
-              cards: user1Data.getCards(),
-            });
-            tmp1.addCoins(potAmount);
-          } else if (c < 22) {
-            arr.push({
-              name: user2Data.getName(),
-              balance: user1Data.getCoinBalance() + Math.floor(potAmount),
-              winning: potAmount,
-              score: user2Data.getScore(),
-              cards: user2Data.getCards(),
-            });
-            tmp2.addCoins(potAmount);
-          }
-        }
+        // if (a < 22 && b < 22 && c < 22) {
+        //   if (a > b && a > c) {
+        //     //dealer wins
+        //     arr.push({
+        //       name: "Dealer",
+        //       winning: potAmount,
+        //       score: dealerScore,
+        //       cards: dealerCards,
+        //     });
+        //   } else if (b > a && b > c) {
+        //     //user1 wins
+        //     arr.push({
+        //       balance: user1Data.getCoinBalance() + potAmount,
+        //       name: user1Data.getName(),
+        //       winning: potAmount,
+        //       score: user1Data.getScore(),
+        //       cards: user1Data.getCards(),
+        //     });
+        //     tmp1.addCoins(potAmount);
+        //   } else if (c > a && c > b) {
+        //     //user2 wins
+        //     arr.push({
+        //       balance: user2Data.getCoinBalance() + potAmount,
+        //       name: user2Data.getName(),
+        //       winning: potAmount,
+        //       score: user2Data.getScore(),
+        //       cards: user2Data.getCards(),
+        //     });
+        //     tmp2.addCoins(potAmount);
+        //   } else if (a == b && a > c) {
+        //     //check dealer and user 1 length of
+        //     if (a == 21) {
+        //       if (dealerCardCount == 2 && user1Data.getCards().length == 2) {
+        //         //tie
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: Math.floor(potAmount / 2),
+        //           score: dealerScore,
+        //         });
+        //         arr.push({
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           name: user1Data.getName(),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user1Data.getScore(),
+        //         });
+        //         tmp1.addCoins(Math.floor(potAmount / 2));
+        //       } else if (
+        //         dealerCardCount == 2 &&
+        //         user1Data.getCards().length > 2
+        //       ) {
+        //         //dealer wins
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: potAmount,
+        //           score: dealerScore,
+        //           cards: dealerCards,
+        //         });
+        //       } else if (
+        //         dealerCardCount > 2 &&
+        //         user1Data.getCards().length == 2
+        //       ) {
+        //         //user1 wins
+        //         arr.push({
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           name: user1Data.getName(),
+        //           winning: potAmount,
+        //           score: user1Data.getScore(),
+        //           cards: user1Data.getCards(),
+        //         });
+        //         tmp1.addCoins(potAmount);
+        //       } else {
+        //         //tie
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: Math.floor(potAmount / 2),
+        //           score: dealerScore,
+        //         });
+        //         arr.push({
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           name: user1Data.getName(),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user1Data.getScore(),
+        //         });
+        //         tmp1.addCoins(Math.floor(potAmount / 2));
+        //       }
+        //     } else {
+        //       // tie dealer user1
+        //       arr.push({
+        //         name: "Dealer",
+        //         winning: Math.floor(potAmount / 2),
+        //         score: dealerScore,
+        //       });
+        //       arr.push({
+        //         balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //         name: user1Data.getName(),
+        //         winning: Math.floor(potAmount / 2),
+        //         score: user1Data.getScore(),
+        //       });
+        //       tmp1.addCoins(Math.floor(potAmount / 2));
+        //     }
+        //   } else if (a == c && a > b) {
+        //     //check dealer and user 1 length of cards
+        //     if (a == 21) {
+        //       if (dealerCardCount == 2 && user2Data.getCards().length == 2) {
+        //         //tie
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: Math.floor(potAmount / 2),
+        //           score: dealerScore,
+        //         });
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user2Data.getScore(),
+        //         });
+        //         tmp2.addCoins(Math.floor(potAmount / 2));
+        //       } else if (
+        //         dealerCardCount == 2 &&
+        //         user2Data.getCards().length > 2
+        //       ) {
+        //         //dealer wins
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: potAmount,
+        //           score: dealerScore,
+        //           cards: dealerCards,
+        //         });
+        //       } else if (
+        //         dealerCardCount > 2 &&
+        //         user2Data.getCards().length == 2
+        //       ) {
+        //         //user2 wins
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user2Data.getScore(),
+        //           cards: user2Data.getCards(),
+        //         });
+        //         tmp2.addCoins(potAmount);
+        //       } else {
+        //         //tie
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: Math.floor(potAmount / 2),
+        //           score: dealerScore,
+        //         });
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user2Data.getScore(),
+        //         });
+        //         tmp2.addCoins(Math.floor(potAmount / 2));
+        //       }
+        //     } else {
+        //       //tie
+        //       arr.push({
+        //         name: "Dealer",
+        //         winning: Math.floor(potAmount / 2),
+        //         score: dealerScore,
+        //       });
+        //       arr.push({
+        //         name: user2Data.getName(),
+        //         balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //         winning: Math.floor(potAmount / 2),
+        //         score: user2Data.getScore(),
+        //       });
+        //       tmp2.addCoins(Math.floor(potAmount / 2));
+        //     }
+        //   } else if (b == c && b > a) {
+        //     //check dealer and user 1 length of cards
+        //     if (b == 21) {
+        //       if (
+        //         user1Data.getCards().length == 2 &&
+        //         user2Data.getCards().length == 2
+        //       ) {
+        //         //tie
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user1Data.getScore(),
+        //         });
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user2Data.getScore(),
+        //         });
+        //         tmp1.addCoins(Math.floor(potAmount / 2));
+        //         tmp2.addCoins(Math.floor(potAmount / 2));
+        //       } else if (
+        //         user1Data.getCards().length == 2 &&
+        //         user2Data.getCards().length > 2
+        //       ) {
+        //         //user1 wins
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user1Data.getScore(),
+        //           cards: user1Data.getCards(),
+        //         });
+        //         tmp1.addCoins(potAmount);
+        //       } else if (
+        //         user1Data.getCards().length > 2 &&
+        //         user2Data.getCards().length == 2
+        //       ) {
+        //         //user2 wins
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user2Data.getScore(),
+        //           cards: user2Data.getCards(),
+        //         });
+        //         tmp2.addCoins(potAmount);
+        //       } else {
+        //         //tie
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user1Data.getScore(),
+        //         });
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user2Data.getScore(),
+        //         });
+        //         tmp1.addCoins(Math.floor(potAmount / 2));
+        //         tmp2.addCoins(Math.floor(potAmount / 2));
+        //       }
+        //     } else {
+        //       //tie
+        //       arr.push({
+        //         name: user1Data.getName(),
+        //         balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //         winning: Math.floor(potAmount / 2),
+        //         score: user1Data.getScore(),
+        //       });
+        //       arr.push({
+        //         name: user2Data.getName(),
+        //         balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //         winning: Math.floor(potAmount / 2),
+        //         score: user2Data.getScore(),
+        //       });
+        //       tmp1.addCoins(Math.floor(potAmount / 2));
+        //       tmp2.addCoins(Math.floor(potAmount / 2));
+        //     }
+        //   } else if (a == b && a == c) {
+        //     if (a == 21) {
+        //       if (dealerCardCount == 2) {
+        //         if (
+        //           user1Data.getCards().length == 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //tie all
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 3),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 3),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 3),
+        //             score: user1Data.getScore(),
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 3),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 3),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 3));
+        //           tmp2.addCoins(Math.floor(potAmount / 3));
+        //         } else if (
+        //           user1Data.getCards().length == 2 &&
+        //           user2Data.getCards().length > 2
+        //         ) {
+        //           //dealer user1 tie
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 2),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //         } else if (
+        //           user1Data.getCards().length > 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //dealer user2 tie
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 2),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         } else {
+        //           // dealer wins
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: potAmount,
+        //             score: dealerScore,
+        //             cards: dealerCards,
+        //           });
+        //         }
+        //       } else {
+        //         if (
+        //           user1Data.getCards().length == 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //tie users
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         } else if (
+        //           user1Data.getCards().length == 2 &&
+        //           user2Data.getCards().length > 2
+        //         ) {
+        //           //user1 wins
+        //           arr.push({
+        //             balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //             name: user1Data.getName(),
+        //             winning: potAmount,
+        //             score: user1Data.getScore(),
+        //             cards: user1Data.getCards(),
+        //           });
+        //           tmp1.addCoins(potAmount);
+        //         } else if (
+        //           user1Data.getCards().length > 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //user2 wins
+        //           arr.push({
+        //             balance: user2Data.getCoinBalance() + Math.floor(potAmount),
+        //             name: user2Data.getName(),
+        //             winning: potAmount,
+        //             score: user2Data.getScore(),
+        //             cards: user2Data.getCards(),
+        //           });
+        //           tmp2.addCoins(potAmount);
+        //         } else {
+        //           // tie
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         }
+        //       }
+        //     } else {
+        //       //tie
+        //       arr.push({
+        //         name: "Dealer",
+        //         winning: Math.floor(potAmount / 3),
+        //         score: dealerScore,
+        //       });
+        //       arr.push({
+        //         name: user1Data.getName(),
+        //         balance: user1Data.getCoinBalance() + Math.floor(potAmount / 3),
+        //         winning: Math.floor(potAmount / 3),
+        //         score: user1Data.getScore(),
+        //       });
+        //       arr.push({
+        //         name: user2Data.getName(),
+        //         balance: user1Data.getCoinBalance() + Math.floor(potAmount / 3),
+        //         winning: Math.floor(potAmount / 3),
+        //         score: user2Data.getScore(),
+        //       });
+        //       tmp1.addCoins(Math.floor(potAmount / 3));
+        //       tmp2.addCoins(Math.floor(potAmount / 3));
+        //     }
+        //   }
+        // } else {
+        //   if (a < 22 && b < 22) {
+        //     if (a !== b) {
+        //       if (a > b) {
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: potAmount,
+        //           score: dealerScore,
+        //           cards: dealerCards,
+        //         });
+        //       } else {
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user1Data.getScore(),
+        //           cards: user1Data.getCards(),
+        //         });
+        //         tmp1.addCoins(potAmount);
+        //       }
+        //     } else {
+        //       //check dealer and user 1 length of
+        //       if (a == 21) {
+        //         if (dealerCardCount == 2 && user1Data.getCards().length == 2) {
+        //           //tie
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 2),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //         } else if (
+        //           dealerCardCount == 2 &&
+        //           user1Data.getCards().length > 2
+        //         ) {
+        //           //dealer wins
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: potAmount,
+        //             score: dealerScore,
+        //             cards: dealerCards,
+        //           });
+        //         } else if (
+        //           dealerCardCount > 2 &&
+        //           user1Data.getCards().length == 2
+        //         ) {
+        //           //user1 wins
+        //           arr.push({
+        //             balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //             name: user1Data.getName(),
+        //             winning: potAmount,
+        //             score: user1Data.getScore(),
+        //             cards: user1Data.getCards(),
+        //           });
+        //           tmp1.addCoins(potAmount);
+        //         } else {
+        //           //tie
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 2),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //         }
+        //       } else {
+        //         // tie dealer user1
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: Math.floor(potAmount / 2),
+        //           score: dealerScore,
+        //         });
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user1Data.getScore(),
+        //         });
+        //         tmp1.addCoins(Math.floor(potAmount / 2));
+        //       }
+        //     }
+        //   } else if (a < 22 && c < 22) {
+        //     if (a !== c) {
+        //       if (a > c) {
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: potAmount,
+        //           score: dealerScore,
+        //           cards: dealerCards,
+        //         });
+        //       } else {
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user2Data.getScore(),
+        //           cards: user2Data.getCards(),
+        //         });
+        //         tmp2.addCoins(potAmount);
+        //       }
+        //     } else {
+        //       //check dealer and user 1 length of cards
+        //       if (a == 21) {
+        //         if (dealerCardCount == 2 && user2Data.getCards().length == 2) {
+        //           //tie
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 2),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         } else if (
+        //           dealerCardCount == 2 &&
+        //           user2Data.getCards().length > 2
+        //         ) {
+        //           //dealer wins
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: potAmount,
+        //             score: dealerScore,
+        //             cards: dealerCards,
+        //           });
+        //         } else if (
+        //           dealerCardCount > 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //user2 wins
+        //           arr.push({
+        //             balance: user2Data.getCoinBalance() + Math.floor(potAmount),
+        //             name: user2Data.getName(),
+        //             winning: potAmount,
+        //             score: user2Data.getScore(),
+        //             cards: user2Data.getCards(),
+        //           });
+        //           tmp2.addCoins(potAmount);
+        //         } else {
+        //           //tie
+        //           arr.push({
+        //             name: "Dealer",
+        //             winning: Math.floor(potAmount / 2),
+        //             score: dealerScore,
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         }
+        //       } else {
+        //         //tie
+        //         arr.push({
+        //           name: "Dealer",
+        //           winning: Math.floor(potAmount / 2),
+        //           score: dealerScore,
+        //         });
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user2Data.getScore(),
+        //         });
+        //         tmp2.addCoins(Math.floor(potAmount / 2));
+        //       }
+        //     }
+        //   } else if (b < 22 && c < 22) {
+        //     if (c !== b) {
+        //       if (c > b) {
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user2Data.getScore(),
+        //           cards: user2Data.getCards(),
+        //         });
+        //         tmp2.addCoins(potAmount);
+        //       } else {
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //           winning: potAmount,
+        //           score: user1Data.getScore(),
+        //           cards: user1Data.getCards(),
+        //         });
+        //         tmp1.addCoins(potAmount);
+        //       }
+        //     } else {
+        //       //check dealer and user 1 length of cards
+        //       if (b == 21) {
+        //         if (
+        //           user1Data.getCards().length == 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //tie
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         } else if (
+        //           user1Data.getCards().length == 2 &&
+        //           user2Data.getCards().length > 2
+        //         ) {
+        //           //user1 wins
+        //           arr.push({
+        //             balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //             name: user1Data.getName(),
+        //             winning: potAmount,
+        //             score: user1Data.getScore(),
+        //             cards: user1Data.getCards(),
+        //           });
+        //           tmp1.addCoins(potAmount);
+        //         } else if (
+        //           user1Data.getCards().length > 2 &&
+        //           user2Data.getCards().length == 2
+        //         ) {
+        //           //user2 wins
+        //           arr.push({
+        //             balance: user2Data.getCoinBalance() + Math.floor(potAmount),
+        //             name: user2Data.getName(),
+        //             winning: potAmount,
+        //             score: user2Data.getScore(),
+        //             cards: user2Data.getCards(),
+        //           });
+        //           tmp2.addCoins(potAmount);
+        //         } else {
+        //           //tie
+        //           arr.push({
+        //             balance:
+        //               user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user1Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user1Data.getScore(),
+        //           });
+        //           arr.push({
+        //             balance:
+        //               user2Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //             name: user2Data.getName(),
+        //             winning: Math.floor(potAmount / 2),
+        //             score: user2Data.getScore(),
+        //           });
+        //           tmp1.addCoins(Math.floor(potAmount / 2));
+        //           tmp2.addCoins(Math.floor(potAmount / 2));
+        //         }
+        //       } else {
+        //         //tie
+        //         arr.push({
+        //           name: user1Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user1Data.getScore(),
+        //         });
+        //         arr.push({
+        //           name: user2Data.getName(),
+        //           balance:
+        //             user1Data.getCoinBalance() + Math.floor(potAmount / 2),
+        //           winning: Math.floor(potAmount / 2),
+        //           score: user2Data.getScore(),
+        //         });
+        //         tmp1.addCoins(Math.floor(potAmount / 2));
+        //         tmp2.addCoins(Math.floor(potAmount / 2));
+        //       }
+        //     }
+        //   } else if (a < 22) {
+        //     arr.push({
+        //       name: "Dealer",
+        //       winning: potAmount,
+        //       score: dealerScore,
+        //       cards: dealerCards,
+        //     });
+        //   } else if (b < 22) {
+        //     arr.push({
+        //       name: user1Data.getName(),
+        //       balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //       winning: potAmount,
+        //       score: user1Data.getScore(),
+        //       cards: user1Data.getCards(),
+        //     });
+        //     tmp1.addCoins(potAmount);
+        //   } else if (c < 22) {
+        //     arr.push({
+        //       name: user2Data.getName(),
+        //       balance: user1Data.getCoinBalance() + Math.floor(potAmount),
+        //       winning: potAmount,
+        //       score: user2Data.getScore(),
+        //       cards: user2Data.getCards(),
+        //     });
+        //     tmp2.addCoins(potAmount);
+        //   }
+        // }
 
         // console.log(arr);
         tmp1.reset();
