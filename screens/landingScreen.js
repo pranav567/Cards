@@ -42,3 +42,11 @@ const styles = StyleSheet.create({
 });
 
 export default LandingScreen;
+
+// import React from 'react'
+
+// export const landingScreen = () => {
+//   return (
+//     <div>landingScreen</div>
+//   )
+// }

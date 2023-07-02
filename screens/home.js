@@ -41,6 +41,7 @@ const Home = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("Details");
+            //
           }}
           style={styles.button}
         >

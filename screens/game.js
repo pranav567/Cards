@@ -31,12 +31,12 @@ const Game = ({ navigation, route }) => {
   const rightValue1 = windowWidth / 2 - 120;
 
   const [availableCards, setAvailableCards] = useState(cardNumbers);
-  const [currentPlayer, setCurrentPlayer] = useState(route.params.user1);
+  const [currentPlayer, setCurrentPlayer] = useState(route.params.users[0]);
+  const [allUsers, setAllUsers] = useState(route.params.users);
+  const [totalPlayers, setTotalPlayers] = useState(route.params.users.length);
   const [potAmount, setPotAmount] = useState(0);
   const [dealerCards, setDealerCards] = useState([]);
   const [showDealer, setShowDealer] = useState(false);
-  const [user1Data, setUser1Data] = useState(null);
-  const [user2Data, setUser2Data] = useState(null);
   const [dealerCardCount, setDealerCardCount] = useState(0);
   const [dealerScore, setDealerScore] = useState(0);
   const [raise, setRaise] = useState(false);
@@ -48,146 +48,60 @@ const Game = ({ navigation, route }) => {
 
   const [userCardCount, setUserCardCount] = useState(-1);
 
-  const handleRotationPress = async (rotate) => {
-    if (!rotate) {
-      // console.log(typeof lockAsync);
-      await lockAsync(OrientationLock.PORTRAIT_UP);
-    } else {
-      await lockAsync(OrientationLock.PORTRAIT_DOWN); // Lock the screen orientation to upside down
-    }
-  };
+  const [showDealerPage, setShowDealerPage] = useState(false);
+  const [showResultButton, setShowResultButton] = useState(false);
 
   useEffect(() => {
     const gameDisplay = () => {
       if (gameOver) {
-        //decide winner
-        let a = dealerScore;
-        let b = user1Data.getScore();
-        let c = user2Data.getScore();
-
-        let tmp1 = user1Data;
-        let tmp2 = user2Data;
-
-        let arr = [];
-        let scores = [a, b, c];
-        let mx = 0;
-        let finalArrayName = [];
-        scores.forEach((obj, index) => {
-          if (obj < 22 && obj > mx) mx = obj;
+        //deci
+        let arrScores = dealerScore > 21 ? [] : [dealerScore];
+        allUsers.map((obj) => {
+          if (obj.getScore() < 22) arrScores.push(obj.getScore());
         });
 
-        // console.log(mx);
-
-        if (a == mx) {
-          finalArrayName.push("dealer");
-        }
-        if (b == mx) {
-          finalArrayName.push("user1");
-        }
-        if (c == mx) {
-          finalArrayName.push("user2");
-        }
-        // console.log(finalArrayName);
-
-        if (mx == 21 && finalArrayName.length > 1) {
-          let winners = 0;
-          if (a == 21 && dealerCardCount == 2) winners += 1;
-          if (b == 21 && user1Data.getCards().length == 2) winners += 1;
-          if (c == 21 && user2Data.getCards().length == 2) winners += 1;
-
-          if (a == 21 && dealerCardCount == 2) {
-            arr.push({
-              name: "Dealer",
-              winning: Math.floor(potAmount / winners),
-              score: dealerScore,
-              cards: dealerCards,
-            });
-          }
-          if (b == 21 && user1Data.getCards().length == 2) {
-            arr.push({
-              balance:
-                user1Data.getCoinBalance() + Math.floor(potAmount / winners),
-              name: user1Data.getName(),
-              winning: Math.floor(potAmount / winners),
-              score: user1Data.getScore(),
-              cards: user1Data.getCards(),
-            });
-            tmp1.addCoins(Math.floor(potAmount / winners));
-          }
-          if (c == 21 && user2Data.getCards().length == 2) {
-            arr.push({
-              balance:
-                user2Data.getCoinBalance() + Math.floor(potAmount / winners),
-              name: user2Data.getName(),
-              winning: Math.floor(potAmount / winners),
-              score: user2Data.getScore(),
-              cards: user2Data.getCards(),
-            });
-            tmp2.addCoins(Math.floor(potAmount / winners));
-          }
+        let mx = Math.max(...arrScores);
+        let finalWinners = [];
+        if (mx !== 21) {
+          if (dealerScore == mx) finalWinners.append("dealer");
+          allUsers.map((obj) => {
+            if (obj.getScore() == mx) finalWinners.push(obj.getName());
+          });
         } else {
-          if (finalArrayName.length > 0) {
-            if (finalArrayName.includes("dealer")) {
-              // console.log("hell");
-              arr.push({
-                name: "Dealer",
-                winning: Math.floor(potAmount / finalArrayName.length),
-                score: dealerScore,
-                cards: dealerCards,
-              });
-            }
-            if (finalArrayName.includes("user1")) {
-              // console.log("hell");
-              arr.push({
-                balance:
-                  user1Data.getCoinBalance() +
-                  Math.floor(potAmount / finalArrayName.length),
-                name: user1Data.getName(),
-                winning: Math.floor(potAmount / finalArrayName.length),
-                score: user1Data.getScore(),
-                cards: user1Data.getCards(),
-              });
-              tmp1.addCoins(Math.floor(potAmount / finalArrayName.length));
-            }
-            if (finalArrayName.includes("user2")) {
-              // console.log("hell");
-              arr.push({
-                balance:
-                  user2Data.getCoinBalance() +
-                  Math.floor(potAmount / finalArrayName.length),
-                name: user2Data.getName(),
-                winning: Math.floor(potAmount / finalArrayName.length),
-                score: user2Data.getScore(),
-                cards: user2Data.getCards(),
-              });
-              tmp2.addCoins(Math.floor(potAmount / finalArrayName.length));
-            }
+          let checkBlackJacks = false;
+          if (dealerCards.length == 2 && dealerScore == 21)
+            checkBlackJacks = true;
+          allUsers.map((obj) => {
+            if (obj.getCards().length == 2 && obj.getScore() == 21)
+              checkBlackJacks = true;
+          });
+
+          if (checkBlackJacks) {
+            if (dealerScore == mx && dealerCardCount == 2)
+              finalWinners.push("dealer");
+            allUsers.map((obj) => {
+              if (obj.getScore() == mx && obj.getCards().length == 2)
+                finalWinners.push(obj.getName());
+            });
           } else {
-            arr.push({
-              balance: user1Data.getCoinBalance() + Math.floor(potAmount / 2),
-              name: user1Data.getName(),
-              winning: Math.floor(potAmount / 2),
-              score: user1Data.getScore(),
-              cards: user1Data.getCards(),
+            if (dealerScore == mx) finalWinners.push("dealer");
+            allUsers.map((obj) => {
+              if (obj.getScore() == mx) finalWinners.push(obj.getName());
             });
-            tmp1.addCoins(Math.floor(potAmount / 2));
-            arr.push({
-              balance: user2Data.getCoinBalance() + Math.floor(potAmount / 2),
-              name: user2Data.getName(),
-              winning: Math.floor(potAmount / 2),
-              score: user2Data.getScore(),
-              cards: user2Data.getCards(),
-            });
-            tmp2.addCoins(Math.floor(potAmount / 2));
           }
         }
+        console.log(finalWinners);
+        let potDivide = finalWinners.length;
 
-        // console.log(arr);
-        tmp1.reset();
-        tmp2.reset();
-        setUser1Data(tmp1);
-        setUser2Data(tmp2);
-        setShowWinner(arr);
+        let tmpUsers = allUsers;
+        for (let i = 0; i < totalPlayers; i++) {
+          if (finalWinners.includes(tmpUsers[i].getName())) {
+            tmpUsers[i].addCoins(Math.floor(potAmount / potDivide));
+          }
+        }
+        setAllUsers(tmpUsers);
+        setShowWinner(finalWinners);
+        console.log(finalWinners);
       }
     };
     gameDisplay();
@@ -225,7 +139,9 @@ const Game = ({ navigation, route }) => {
         setDealerCards(cardsDealer);
         setDealerScore(score);
       } else {
-        setGameOver(true);
+        // setGameOver(true);
+        setTimeout(() => setShowResultButton(true), 1000);
+        // setShowResultButton(true);
       }
       setDealerCardCount(cardsDealer.length);
     };
@@ -284,27 +200,34 @@ const Game = ({ navigation, route }) => {
   const stand = () => {
     let tmpUser = currentPlayer;
     tmpUser.computeScore();
-    if (tmpUser.playerNumber == 1) {
-      setUser1Data(tmpUser);
-      setCurrentPlayer(route.params.user2);
-      handleRotationPress(true);
+    if (tmpUser.playerNumber < totalPlayers) {
+      let tmp = allUsers;
+      tmp[tmpUser.playerNumber - 1] = tmpUser;
+      setAllUsers(tmp);
+      setCurrentPlayer(allUsers[tmpUser.playerNumber]);
     } else {
-      handleRotationPress(false);
-      setUser2Data(tmpUser);
+      let tmp = allUsers;
+      tmp[tmpUser.playerNumber - 1] = tmpUser;
+      setAllUsers(tmp);
       setCurrentPlayer(null);
-      setShowDealer(true);
-      let score = 0;
-      dealerCards.forEach((obj) => {
-        if (cardScore[obj][0] == 1) {
-          score += 11;
-        } else {
-          score += cardScore[obj][0];
-        }
-      });
-      // console.log(dealerCardCount);
-      setDealerScore(score);
-      setDealerCardCount(0);
+      setShowDealerPage(true);
     }
+  };
+
+  const revealDealer = () => {
+    setShowDealerPage(false);
+    setShowDealer(true);
+    let score = 0;
+    dealerCards.forEach((obj) => {
+      if (cardScore[obj][0] == 1) {
+        score += 11;
+      } else {
+        score += cardScore[obj][0];
+      }
+    });
+    // console.log(dealerCardCount);
+    setDealerScore(score);
+    setDealerCardCount(0);
   };
 
   const hit = (raised = false) => {
@@ -338,7 +261,11 @@ const Game = ({ navigation, route }) => {
   };
 
   const nextRound = () => {
-    setCurrentPlayer(user1Data);
+    let tmpUsers = allUsers;
+    for (let i = 0; i < totalPlayers; i++) {
+      tmpUsers[i].reset();
+    }
+    setCurrentPlayer(tmpUsers[0]);
     setPotAmount(0);
     setGameOver(false);
     setShowWinner([]);
@@ -348,6 +275,8 @@ const Game = ({ navigation, route }) => {
     setShowDealer(false);
     setDealerCards([]);
     setAvailableCards(cardNumbers);
+    setShowDealerPage(false);
+    setShowResultButton(false);
   };
 
   const styles = StyleSheet.create({
@@ -710,6 +639,64 @@ const Game = ({ navigation, route }) => {
                   <></>
                 )} */}
               </>
+            ) : showDealerPage ? (
+              <View
+                style={{
+                  flex: 1,
+                  // backgroundColor: "red",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: "50%",
+                    alignItems: "center",
+                    padding: 10,
+                    borderWidth: 1,
+                    borderColor: "white",
+                    borderRadius: 20,
+                  }}
+                  onPress={() => {
+                    revealDealer();
+                  }}
+                >
+                  <Text style={{ fontSize: 18, color: "white" }}>
+                    Reveal Dealer Cards
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : showResultButton ? (
+              <View
+                style={{
+                  flex: 1,
+                  // backgroundColor: "red",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    width: "50%",
+                    alignItems: "center",
+                    padding: 10,
+                    borderWidth: 1,
+                    borderColor: "white",
+                    borderRadius: 20,
+                  }}
+                  onPress={() => {
+                    setShowResultButton(false);
+                    setGameOver(true);
+                    // allUsers.forEach((obj) => {
+                    //   console.log(JSON.stringify(obj));
+                    // });
+                  }}
+                >
+                  <Text style={{ fontSize: 18, color: "white" }}>
+                    Show Results
+                  </Text>
+                </TouchableOpacity>
+              </View>
             ) : (
               <>
                 <View style={{ marginTop: 40, alignItems: "center" }}>
@@ -796,7 +783,7 @@ const Game = ({ navigation, route }) => {
                     Pot Amount
                   </Text>
                 </View>
-                <View
+                {/* <View
                   style={{
                     flexDirection: "row",
                     justifyContent: "space-evenly",
@@ -949,215 +936,248 @@ const Game = ({ navigation, route }) => {
                       Score : {user2Data.getScore()}
                     </Text>
                   </View>
-                </View>
+                </View> */}
               </>
             )}
           </>
         ) : (
-          <>
-            {showWinner.length == 1 ? (
-              <>
+          <ScrollView
+            contentContainerStyle={{
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              // width: "90%",
+              padding: 5,
+              marginTop: 10,
+              marginRight: 10,
+              marginLeft: 10,
+              marginBottom: 10,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View
+              style={{
+                width: "100%",
+                marginTop: 30,
+                // marginLeft: 20,
+                borderWidth: 1,
+                borderColor: "white",
+              }}
+            >
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  padding: 10,
+                }}
+              >
+                <Text style={{ color: "white", width: "30%", fontSize: 18 }}>
+                  Name
+                </Text>
+                <Text style={{ color: "white", width: "20%", fontSize: 18 }}>
+                  Score
+                </Text>
+                <Text style={{ color: "white", width: "30%", fontSize: 18 }}>
+                  Chips
+                </Text>
+                <Text
+                  style={{
+                    color: "white",
+                    width: "20%",
+                    fontSize: 18,
+                  }}
+                >
+                  Result
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: "100%",
+                  borderWidth: 1,
+                  borderColor: "white",
+                }}
+              ></View>
+              <View
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  padding: 10,
+                  marginTop: 20,
+                }}
+              >
+                <Text style={{ color: "white", width: "30%", fontSize: 18 }}>
+                  Dealer
+                </Text>
+                <Text style={{ color: "white", width: "20%", fontSize: 18 }}>
+                  {dealerScore}
+                </Text>
+                <Text
+                  style={{
+                    color: "white",
+                    width: "30%",
+                    fontSize: 18,
+                  }}
+                >
+                  -
+                </Text>
+                <Text
+                  style={{
+                    color: "white",
+                    width: "20%",
+                    fontSize: 18,
+                  }}
+                >
+                  {dealerScore > 21 ? (
+                    "Bust"
+                  ) : showWinner.includes("dealer") ? (
+                    <Text>&#x1F389;</Text>
+                  ) : (
+                    <Text>&#x1F622;</Text>
+                  )}
+                </Text>
+              </View>
+              {allUsers.map((obj, ind) => (
+                <View
+                  key={ind}
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    // marginTop: 20,
+                    padding: 10,
+                  }}
+                >
+                  <Text style={{ color: "white", width: "30%", fontSize: 18 }}>
+                    {obj.getName()}
+                  </Text>
+                  <Text style={{ color: "white", width: "20%", fontSize: 18 }}>
+                    {obj.getScore()}
+                  </Text>
+                  <Text style={{ color: "white", width: "30%", fontSize: 18 }}>
+                    {obj.getCoinBalance()}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "white",
+                      width: "20%",
+                      fontSize: 18,
+                    }}
+                  >
+                    {obj.getScore() > 21 ? (
+                      "Bust"
+                    ) : showWinner.includes(obj.getName()) ? (
+                      <Text>&#x1F389;</Text>
+                    ) : (
+                      <Text>&#x1F622;</Text>
+                    )}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            <View
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 30,
+              }}
+            >
+              <Text style={{ fontSize: 20, color: "white" }}>Cards</Text>
+            </View>
+            <View style={{ width: "100%", marginTop: 10, marginLeft: 10 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View
                   style={{
-                    // backgroundColor: "red",
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
-                    marginTop: 50,
+                    marginRight: 20,
                   }}
                 >
-                  <Text style={{ color: "white", fontSize: 25, margin: 20 }}>
-                    {showWinner[0].name} Won
-                  </Text>
+                  <Text style={{ fontSize: 15, color: "white" }}>Dealer</Text>
                   <View
                     style={{
+                      marginTop: 10,
                       flexDirection: "row",
                       justifyContent: "center",
-                      margin: 20,
+                      alignItems: "center",
                     }}
                   >
-                    {showWinner[0].cards.map((obj, index) => (
+                    {dealerCards.map((obj, index) => (
                       <Image
                         source={cardObj[obj]}
                         style={{
-                          width: 101,
-                          height: 141,
+                          width: 100,
+                          height: 140,
                           marginLeft: index !== 0 ? -60 : 0,
                           borderRadius: 5,
                         }}
                         key={index}
                       />
-                      //   <MyComponent obj={obj} />
-                      //   <Text key={index}>{require(obj)}</Text>
                     ))}
                   </View>
-
-                  <Text style={{ color: "white", fontSize: 22, margin: 10 }}>
-                    Hand Value : {showWinner[0].score}
-                  </Text>
-                  <Text style={{ color: "white", fontSize: 22, margin: 10 }}>
-                    Won : {showWinner[0].winning} chips
-                  </Text>
-                  {showWinner[0].name == user1Data.getName() ||
-                  showWinner[0].name == user2Data.getName() ? (
-                    <Text style={{ color: "white", fontSize: 22, margin: 10 }}>
-                      Balance : {showWinner[0].balance} chips
-                    </Text>
-                  ) : (
-                    <></>
-                  )}
-                  <TouchableOpacity
-                    onPress={() => {
-                      nextRound();
-                    }}
-                    style={{
-                      margin: 20,
-                      marginTop: 40,
-                      padding: 10,
-                      alignItems: "center",
-                      borderWidth: 1,
-                      borderColor: "white",
-                      borderRadius: 20,
-                    }}
-                  >
-                    <Text style={{ color: "white", fontSize: 18 }}>
-                      Next Round
-                    </Text>
-                  </TouchableOpacity>
                 </View>
-              </>
-            ) : showWinner.length == 2 ? (
-              <>
-                {showWinner.map((obj, index) => (
+                {allUsers.map((obj, ind) => (
                   <View
-                    key={index}
+                    key={ind}
                     style={{
-                      // backgroundColor: "red",
                       flexDirection: "column",
                       justifyContent: "center",
                       alignItems: "center",
-                      marginTop: 50,
+                      marginRight: 20,
                     }}
                   >
-                    <Text style={{ color: "white", fontSize: 25, margin: 20 }}>
-                      {obj.name}
+                    <Text style={{ fontSize: 15, color: "white" }}>
+                      {obj.getName()}
                     </Text>
-
-                    <Text style={{ color: "white", fontSize: 22, margin: 10 }}>
-                      Hand Value : {obj.score}
-                    </Text>
-                    <Text style={{ color: "white", fontSize: 22, margin: 10 }}>
-                      Won : {obj.winning} chips
-                    </Text>
-                    {obj.name == user1Data.getName() ||
-                    obj.name == user2Data.getName() ? (
-                      <Text
-                        style={{ color: "white", fontSize: 22, margin: 10 }}
-                      >
-                        Balance : {obj.balance} chips
-                      </Text>
-                    ) : (
-                      <></>
-                    )}
-                  </View>
-                ))}
-                <View style={{ alignItems: "center" }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      nextRound();
-                    }}
-                    style={{
-                      margin: 20,
-                      marginTop: 60,
-                      padding: 10,
-                      alignItems: "center",
-                      borderWidth: 1,
-                      borderColor: "white",
-                      borderRadius: 20,
-                      width: "50%",
-                    }}
-                  >
-                    <Text style={{ color: "white", fontSize: 18 }}>
-                      Next Round
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            ) : showWinner.length > 2 ? (
-              <View>
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {showWinner.map((obj, index) => (
                     <View
-                      key={index}
                       style={{
-                        // backgroundColor: "red",
-                        flexDirection: "column",
+                        marginTop: 10,
+                        flexDirection: "row",
                         justifyContent: "center",
                         alignItems: "center",
-                        marginTop: 25,
                       }}
                     >
-                      <Text
-                        style={{ color: "white", fontSize: 25, margin: 20 }}
-                      >
-                        {obj.name}
-                      </Text>
-
-                      <Text
-                        style={{ color: "white", fontSize: 22, margin: 10 }}
-                      >
-                        Hand Value : {obj.score}
-                      </Text>
-                      <Text
-                        style={{ color: "white", fontSize: 22, margin: 10 }}
-                      >
-                        Won : {obj.winning} chips
-                      </Text>
-                      {obj.name == user1Data.getName() ||
-                      obj.name == user2Data.getName() ? (
-                        <Text
-                          style={{ color: "white", fontSize: 22, margin: 10 }}
-                        >
-                          Balance : {obj.balance} chips
-                        </Text>
-                      ) : (
-                        <></>
-                      )}
+                      {obj.getCards().map((obj1, index) => (
+                        <Image
+                          source={cardObj[obj1]}
+                          style={{
+                            width: 100,
+                            height: 140,
+                            marginLeft: index !== 0 ? -60 : 0,
+                            borderRadius: 5,
+                          }}
+                          key={index}
+                        />
+                      ))}
                     </View>
-                  ))}
-                </ScrollView>
-
-                <View style={{ alignItems: "center" }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      nextRound();
-                    }}
-                    style={{
-                      margin: 20,
-                      marginTop: 20,
-                      padding: 10,
-                      alignItems: "center",
-                      borderWidth: 1,
-                      borderColor: "white",
-                      borderRadius: 20,
-                      width: "50%",
-                    }}
-                  >
-                    <Text style={{ color: "white", fontSize: 18 }}>
-                      Next Round
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ) : (
-              <></>
-            )}
-          </>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+            <View style={{ marginTop: 30, marginBottom: 50, width: "50%" }}>
+              <TouchableOpacity
+                onPress={() => {
+                  nextRound();
+                }}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: 10,
+                  borderWidth: 1,
+                  borderColor: "white",
+                  borderRadius: 20,
+                }}
+              >
+                <Text style={{ fontSize: 15, color: "white" }}>Next Round</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         )}
       </ImageBackground>
-      {/* dealer cards */}
-
-      {/* pot */}
     </View>
   );
 };
