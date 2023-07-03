@@ -40,6 +40,7 @@ const Game = ({ navigation, route }) => {
   const [dealerCardCount, setDealerCardCount] = useState(0);
   const [dealerScore, setDealerScore] = useState(0);
   const [raise, setRaise] = useState(false);
+  const [dealerchips, setDealerchips] = useState(0);
 
   const [gameOver, setGameOver] = useState(false);
   //[{name,cards,score,winnings}]
@@ -60,18 +61,21 @@ const Game = ({ navigation, route }) => {
           if (obj.getScore() < 22) arrScores.push(obj.getScore());
         });
 
-        let mx = Math.max(...arrScores);
+        let mx = arrScores.length > 0 ? Math.max(...arrScores) : 0;
+        console.log(`max - ${mx}`);
         let finalWinners = [];
         if (mx !== 21) {
-          if (dealerScore == mx) finalWinners.append("dealer");
-          allUsers.map((obj) => {
+          if (dealerScore == mx) {
+            finalWinners.push("dealer");
+          }
+          allUsers.forEach((obj) => {
             if (obj.getScore() == mx) finalWinners.push(obj.getName());
           });
         } else {
           let checkBlackJacks = false;
           if (dealerCards.length == 2 && dealerScore == 21)
             checkBlackJacks = true;
-          allUsers.map((obj) => {
+          allUsers.forEach((obj) => {
             if (obj.getCards().length == 2 && obj.getScore() == 21)
               checkBlackJacks = true;
           });
@@ -79,29 +83,31 @@ const Game = ({ navigation, route }) => {
           if (checkBlackJacks) {
             if (dealerScore == mx && dealerCardCount == 2)
               finalWinners.push("dealer");
-            allUsers.map((obj) => {
+            allUsers.forEach((obj) => {
               if (obj.getScore() == mx && obj.getCards().length == 2)
                 finalWinners.push(obj.getName());
             });
           } else {
             if (dealerScore == mx) finalWinners.push("dealer");
-            allUsers.map((obj) => {
+            allUsers.forEach((obj) => {
               if (obj.getScore() == mx) finalWinners.push(obj.getName());
             });
           }
         }
-        console.log(finalWinners);
-        let potDivide = finalWinners.length;
-
+        let potDivide =
+          finalWinners.length > 0 ? finalWinners.length : allUsers.length;
         let tmpUsers = allUsers;
         for (let i = 0; i < totalPlayers; i++) {
-          if (finalWinners.includes(tmpUsers[i].getName())) {
+          if (finalWinners.length == 0)
+            tmpUsers[i].addCoins(Math.floor(potAmount / potDivide));
+          else if (finalWinners.includes(tmpUsers[i].getName())) {
             tmpUsers[i].addCoins(Math.floor(potAmount / potDivide));
           }
         }
+        if (finalWinners.includes("dealer"))
+          setDealerchips(Math.floor(potAmount / potDivide));
         setAllUsers(tmpUsers);
         setShowWinner(finalWinners);
-        console.log(finalWinners);
       }
     };
     gameDisplay();
@@ -783,160 +789,6 @@ const Game = ({ navigation, route }) => {
                     Pot Amount
                   </Text>
                 </View>
-                {/* <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-evenly",
-                    alignItems: "center",
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "white",
-                        marginTop: 20,
-                        marginBottom: 20,
-                      }}
-                    >
-                      {user1Data.getName()}
-                    </Text>
-                    {user1Data.getScore() > 21 ? (
-                      <View
-                        style={{
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      >
-                        <View style={{ flexDirection: "row" }}>
-                          {user1Data.getCards().map((obj, index) => (
-                            <Image
-                              source={cardObj[obj]}
-                              style={{
-                                width: 82,
-                                height: 114,
-                                marginLeft: index !== 0 ? -60 : 0,
-                                borderRadius: 5,
-                              }}
-                              key={index}
-                            />
-                          ))}
-                        </View>
-                        <Image
-                          style={{
-                            width: 70,
-                            height: 70,
-                            borderRadius: 70,
-                            marginTop: -82,
-                          }}
-                          source={require("../assets/taash/bust.jpg")}
-                        />
-                      </View>
-                    ) : (
-                      <View style={{ flexDirection: "row" }}>
-                        {user1Data.getCards().map((obj, index) => (
-                          <Image
-                            source={cardObj[obj]}
-                            style={{
-                              width: 82,
-                              height: 114,
-                              marginLeft: index !== 0 ? -60 : 0,
-                              borderRadius: 5,
-                            }}
-                            key={index}
-                          />
-                        ))}
-                      </View>
-                    )}
-
-                    <Text
-                      style={{
-                        color: "white",
-                        marginTop: user1Data.getScore() > 21 ? 35 : 20,
-                        marginBottom: 20,
-                      }}
-                    >
-                      Score : {user1Data.getScore()}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "white",
-                        marginTop: 20,
-                        marginBottom: 20,
-                      }}
-                    >
-                      {user2Data.getName()}
-                    </Text>
-                    {user2Data.getScore() > 21 ? (
-                      <View
-                        style={{
-                          flexDirection: "column",
-                          alignItems: "center",
-                        }}
-                      >
-                        <View style={{ flexDirection: "row" }}>
-                          {user2Data.getCards().map((obj, index) => (
-                            <Image
-                              source={cardObj[obj]}
-                              style={{
-                                width: 82,
-                                height: 114,
-                                marginLeft: index !== 0 ? -60 : 0,
-                                borderRadius: 5,
-                              }}
-                              key={index}
-                            />
-                          ))}
-                        </View>
-                        <Image
-                          style={{
-                            width: 70,
-                            height: 70,
-                            borderRadius: 70,
-                            marginTop: -82,
-                          }}
-                          source={require("../assets/taash/bust.jpg")}
-                        />
-                      </View>
-                    ) : (
-                      <View style={{ flexDirection: "row" }}>
-                        {user2Data.getCards().map((obj, index) => (
-                          <Image
-                            source={cardObj[obj]}
-                            style={{
-                              width: 82,
-                              height: 114,
-                              marginLeft: index !== 0 ? -60 : 0,
-                              borderRadius: 5,
-                            }}
-                            key={index}
-                          />
-                        ))}
-                      </View>
-                    )}
-
-                    <Text
-                      style={{
-                        color: "white",
-                        marginTop: user2Data.getScore() > 21 ? 35 : 20,
-                        marginBottom: 20,
-                      }}
-                    >
-                      Score : {user2Data.getScore()}
-                    </Text>
-                  </View>
-                </View> */}
               </>
             )}
           </>
@@ -1020,7 +872,7 @@ const Game = ({ navigation, route }) => {
                     fontSize: 18,
                   }}
                 >
-                  -
+                  {dealerchips}
                 </Text>
                 <Text
                   style={{
