@@ -188,6 +188,7 @@ const PlayerDetails = ({ navigation }) => {
   const [players, setPlayers] = useState(["", ""]);
   const [currName, setCurrName] = useState("");
   const [curr, setCurr] = useState(-1);
+  const [totalChips, setTotalChips] = useState("10000");
 
   const checkDuplicateNames = () => {
     let tmpPlyrs = [];
@@ -206,7 +207,7 @@ const PlayerDetails = ({ navigation }) => {
       // setPlayer2("");
       let objArr = [];
       players.forEach((obj, ind) => {
-        objArr.push(new User(obj, 500000, ind + 1));
+        objArr.push(new User(obj, parseInt(totalChips), ind + 1));
       });
       navigation.navigate("Game", { users: objArr });
       Toast.show({
@@ -297,7 +298,7 @@ const PlayerDetails = ({ navigation }) => {
               flexDirection: "row",
               justifyContent: "space-between",
               marginTop: 20,
-              marginBottom: 40,
+              marginBottom: 20,
             }}
           >
             <TouchableOpacity
@@ -323,6 +324,36 @@ const PlayerDetails = ({ navigation }) => {
             >
               <Text style={{ fontSize: 18, color: "white" }}>Add Player</Text>
             </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              marginBottom: 40,
+              width: "50%",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontSize: 20, marginRight: 10, color: "white" }}>
+              Enter Chips :
+            </Text>
+            <TextInput
+              style={{
+                fontSize: 18,
+                borderBottomWidth: 1,
+                borderBottomColor: "white",
+                color: "white",
+                marginRight: 15,
+              }}
+              autoFocus={true}
+              value={totalChips}
+              keyboardType="numeric"
+              onChangeText={(e) => {
+                // console.log(e);
+                let text = e.replace(/[^0-9]/g, "");
+                setTotalChips(text);
+              }}
+            />
           </View>
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -386,7 +417,18 @@ const PlayerDetails = ({ navigation }) => {
               <View style={styles.start}>
                 <TouchableOpacity
                   onPress={() => {
-                    startGame();
+                    let i = parseInt(totalChips);
+                    if (i >= 5000 && i <= 500000) {
+                      // console.log(i);
+                      startGame();
+                    } else {
+                      Toast.show({
+                        type: "info",
+                        text1: "Chips can be from 5000 - 500000",
+                        position: "bottom",
+                        visibilityTime: 2000,
+                      });
+                    }
                   }}
                   style={styles.startButton}
                 >

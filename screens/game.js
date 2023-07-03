@@ -62,7 +62,6 @@ const Game = ({ navigation, route }) => {
         });
 
         let mx = arrScores.length > 0 ? Math.max(...arrScores) : 0;
-        console.log(`max - ${mx}`);
         let finalWinners = [];
         if (mx !== 21) {
           if (dealerScore == mx) {
@@ -152,6 +151,7 @@ const Game = ({ navigation, route }) => {
         }
         setDealerCardCount(cardsDealer.length);
       } else {
+        setDealerScore(score);
         setShowDealer(true);
         setDealerCardCount(-1);
       }
@@ -228,11 +228,13 @@ const Game = ({ navigation, route }) => {
   const revealDealer = () => {
     setShowDealerPage(false);
     let score = 0;
-    dealerCards.forEach((obj) => {
-      if (cardScore[obj][0] == 1) {
-        score += 11;
-      } else {
-        score += cardScore[obj][0];
+    dealerCards.forEach((obj, ind) => {
+      if (ind == 0) {
+        if (cardScore[obj][0] == 1) {
+          score += 11;
+        } else {
+          score += cardScore[obj][0];
+        }
       }
     });
     // console.log(dealerCardCount);
@@ -272,21 +274,62 @@ const Game = ({ navigation, route }) => {
 
   const nextRound = () => {
     let tmpUsers = allUsers;
-    for (let i = 0; i < totalPlayers; i++) {
-      tmpUsers[i].reset();
+    let tmp2Users = tmpUsers.filter((obj) => {
+      return obj.getCoinBalance() >= deal + 1500;
+    });
+    let removedPlayers = tmpUsers.filter((obj) => {
+      return obj.getCoinBalance() < deal + 1500;
+    });
+    let names = "";
+    removedPlayers.forEach((obj) => {
+      names += `,${obj.getName()}`;
+    });
+    let newTotal = tmp2Users.length;
+
+    if (newTotal == 0) {
+      setTimeout(() => {
+        Toast.show({
+          type: "info",
+          text1: `Game Over - Insufficient Balance`,
+          position: "bottom",
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+        navigation.navigate("Home");
+      }, 2000);
+    } else {
+      if (newTotal == totalPlayers) {
+        for (let i = 0; i < totalPlayers; i++) {
+          tmp2Users[i].reset();
+        }
+      } else {
+        for (let i = 0; i < newTotal; i++) {
+          tmp2Users[i].reset();
+        }
+        Toast.show({
+          type: "info",
+          text1: `Players Removed for Insufficient Balance`,
+          text2: names.slice(1),
+          position: "bottom",
+          visibilityTime: 4000,
+          autoHide: true,
+        });
+        setAllUsers(tmp2Users);
+        setTotalPlayers(newTotal);
+      }
+      setCurrentPlayer(tmp2Users[0]);
+      setPotAmount(0);
+      setGameOver(false);
+      setShowWinner([]);
+      setDealerCardCount(0);
+      setDealerScore(0);
+      setDeal(deal + 1500);
+      setShowDealer(false);
+      setDealerCards([]);
+      setAvailableCards(cardNumbers);
+      setShowDealerPage(false);
+      setShowResultButton(false);
     }
-    setCurrentPlayer(tmpUsers[0]);
-    setPotAmount(0);
-    setGameOver(false);
-    setShowWinner([]);
-    setDealerCardCount(0);
-    setDealerScore(0);
-    setDeal(deal + 1500);
-    setShowDealer(false);
-    setDealerCards([]);
-    setAvailableCards(cardNumbers);
-    setShowDealerPage(false);
-    setShowResultButton(false);
   };
 
   const styles = StyleSheet.create({
