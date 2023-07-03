@@ -124,32 +124,37 @@ const Game = ({ navigation, route }) => {
           score += cardScore[obj][0];
         }
       });
-      if (score <= 16) {
-        let arr = availableCards;
+      if (showDealer) {
+        if (score <= 16) {
+          let arr = availableCards;
 
-        let getIndex = Math.floor(Math.random() * arr.length);
-        cardsDealer.push(arr[getIndex]);
-        score = 0;
-        cardsDealer.forEach((obj) => {
-          if (cardScore[obj][0] == 1) {
-            score += 11;
-          } else {
-            score += cardScore[obj][0];
-          }
-        });
-        arr = arr.filter((obj) => {
-          return obj !== arr[getIndex];
-        });
+          let getIndex = Math.floor(Math.random() * arr.length);
+          cardsDealer.push(arr[getIndex]);
+          score = 0;
+          cardsDealer.forEach((obj) => {
+            if (cardScore[obj][0] == 1) {
+              score += 11;
+            } else {
+              score += cardScore[obj][0];
+            }
+          });
+          arr = arr.filter((obj) => {
+            return obj !== arr[getIndex];
+          });
 
-        setAvailableCards(arr);
-        setDealerCards(cardsDealer);
-        setDealerScore(score);
+          setAvailableCards(arr);
+          setDealerCards(cardsDealer);
+          setDealerScore(score);
+        } else {
+          // setGameOver(true);
+          setTimeout(() => setShowResultButton(true), 1000);
+          // setShowResultButton(true);
+        }
+        setDealerCardCount(cardsDealer.length);
       } else {
-        // setGameOver(true);
-        setTimeout(() => setShowResultButton(true), 1000);
-        // setShowResultButton(true);
+        setShowDealer(true);
+        setDealerCardCount(-1);
       }
-      setDealerCardCount(cardsDealer.length);
     };
 
     // console.log(currentPlayer);
@@ -222,7 +227,6 @@ const Game = ({ navigation, route }) => {
 
   const revealDealer = () => {
     setShowDealerPage(false);
-    setShowDealer(true);
     let score = 0;
     dealerCards.forEach((obj) => {
       if (cardScore[obj][0] == 1) {
