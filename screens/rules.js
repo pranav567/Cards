@@ -21,7 +21,6 @@ const blackjackRules = [
   "If the dealer busts, all players who are still in the game win.",
   "If the dealer does not bust, the dealer's hand is compared to each player's hand, and the highest hand wins.",
   "If a player's hand value equals the dealer's hand value, it results in a tie or 'push' (no one wins or loses).",
-  "To enhance the second player's experience sitting in front of you, it's recommended to keep the rotation lock off so the game can automatically rotate the screen upside down.",
   "Remember to enjoy the game and have fun!",
 ];
 
